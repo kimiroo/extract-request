@@ -1,18 +1,19 @@
 export default {
   async fetch(request) {
-    const userAgent = request.headers.get("User-Agent") ?? "Unknown";
+    const url = request.url;
+    const body = ["GET", "HEAD"].includes(request.method)
+      ? "(no body)"
+      : await request.text();
 
     const headerText = [...request.headers]
-      .map(([key, value]) => `${key}: ${value}`)
+      .map(([k, v]) => `${k}: ${v}`)
       .join("\n");
 
-    console.log("----- INCOMING HEADERS -----");
-    console.log(headerText);
-    console.log(`Extracted User-Agent: ${userAgent}`);
+    const out = `${request.method} ${url}\n\n${headerText}\n\nBODY:\n${body}\n`;
+    console.log(out);
 
-    return new Response(
-      `Your User-Agent: ${userAgent}\n\nFull Headers:\n${headerText}\n`,
-      { headers: { "Content-Type": "text/plain; charset=utf-8" } }
-    );
+    return new Response(out, {
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   },
 };
